@@ -1,4 +1,4 @@
-INSERT INTO departments (department_name)
+INSERT INTO departments (new_department_name)
 VALUES  ("Management"),
         ("Field"),
         ("Finance"),

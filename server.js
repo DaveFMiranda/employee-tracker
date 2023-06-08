@@ -4,6 +4,11 @@ const mysql = require('mysql2');
 
 const PORT = process.env.PORT || 3001;
 
+let new_department_name;
+let role_name;
+let salary;
+let department_id;
+
 // Connect to database
 const db = mysql.createConnection(
   {
@@ -15,6 +20,8 @@ const db = mysql.createConnection(
   },
   console.log(`Connected to the employees_db database.`)
 );
+
+
 
 db.connect((err) => {
  if (err) {
@@ -40,10 +47,10 @@ db.query(createEmployeesDB, (err) => {
  const createDepartments = `
  CREATE TABLE departments (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  department_name VARCHAR(30) NOT NULL
+  new_department_name VARCHAR(30) NOT NULL
 )
 
-INSERT INTO departments (department_name)
+INSERT INTO departments (new_department_name)
 VALUES  ("Management"),
         ("Field"),
         ("Finance"),
@@ -147,7 +154,7 @@ inquirer
     {
       type: "input",
       message: "What is the name of the department?",
-      name: "department_name",
+      name: "new_department_name",
       when: (answers) => answers.task === 'Add a department',
     },
     {
@@ -223,6 +230,12 @@ inquirer
 
   ])
   .then((answers) => {
+    new_department_name = answers.new_department_name;
+    role_name = answers.title;
+    salary = answers.salary;
+    department_id = answers.department;
+    // ADD VARIABLES AND PASS PARAMETERS FOR addEmployee and updateRole
+    
     switch (answers.task) {
       case "View all departments":
         showDepartments();
@@ -234,10 +247,10 @@ inquirer
         showEmployees();
         break;
       case "Add a department":
-        addDepartment();
+        addDepartment(new_department_name);
         break;
       case "Add a role":
-        addRole();
+        addRole(role_name, salary, department_id);
       case "Add an employee":
         addEmployee();
       case "Update an employee role":
@@ -248,51 +261,80 @@ inquirer
   });
 
 function showDepartments () {
-
+  db.query(`SELECT * FROM departments;`, (err, result) => {
+    if (err) {
+      console.log(err);
+    };
+    console.log(result);
+  });
   console.log ("Departments shown");
-  }
+  };
 
   function showRoles () {
-
+    db.query(`SELECT * FROM roles;`, (err, result) => {
+      if (err) {
+        console.log(err);
+      };
+      console.log(result);
+    });
+    
+    
     console.log ("Roles shown");
 
-  }
+  };
 
 
   function showEmployees () {
+    db.query(`SELECT * FROM employees;`, (err, result) => {
+      if (err) {
+        console.log(err);
+      };
+      console.log(result);
+    });
+
 
     console.log ("Employees shown");
 
-  }
+  };
 
 
 
-  function addDepartment () {
-
+  function addDepartment (new_department_name) {
+    db.query(`INSERT INTO departments (department_name) VALUES ('${new_department_name}')`, (err, result) => {
+      if (err) {
+        console.log(err);
+      };
+      console.log(result);
+    });
     console.log ("Department added");
 
-  }
+  };
 
 
 
-  function addRole () {
-
+  function addRole (role_name, salary, department_id) {
+    db.query(`INSERT INTO roles (title, salary, department_id) VALUES ("${role_name}", "${salary}", "${department_id}")`, (err, result) => {
+      if (err) {
+        console.log(err);
+      };
+      console.log(result);
+    });
     console.log ("Role added");
 
-  }
+  };
 
 
   function addEmployee () {
 
     console.log ("Employee added");
 
-  }
+  };
 
   function updateRole () {
 
     console.log ("Role updated");
 
-  }
+  };
 
 
 
