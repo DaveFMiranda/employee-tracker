@@ -16,6 +16,126 @@ const db = mysql.createConnection(
   console.log(`Connected to the employees_db database.`)
 );
 
+db.connect((err) => {
+ if (err) {
+  console.error("Error connecting to MySQL:", err);
+  return;
+ }
+ console.log('COnnected to MySQL server');
+
+const createEmployeesDB = `
+DROP DATABASE IF EXISTS employees_db;
+CREATE DATABASE employees_db;
+USE employees_db;
+`;
+
+db.query(createEmployeesDB, (err) => {
+  if (err) {
+    console.error("Error creating employees database:", err);
+    return;
+  }
+  console.log("Employees database created");
+ })
+
+ const createDepartments = `
+ CREATE TABLE departments (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  department_name VARCHAR(30) NOT NULL
+)
+
+INSERT INTO departments (department_name)
+VALUES  ("Management"),
+        ("Field"),
+        ("Finance"),
+        ("Communications");
+ `;
+
+ db.query(createDepartments, (err) => {
+  if (err) {
+    console.error("Error creating departments table:", err);
+    return;
+  }
+  console.log("Departments table created");
+ })
+
+ const createRoles = `
+ CREATE TABLE roles (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(30) NOT NULL,
+  salary DECIMAL[(7 [,0])] NOT NULL,
+  department_id INT NOT NULL,
+  FOREIGN KEY (department_id)
+  REFERENCES departments(id)
+)
+
+INSERT INTO roles (title, salary, department_id)
+VALUES  ("Campaign Manager", 120000, 1),
+        ("Field Director", 72000, 2),
+        ("Deputy Field Director", 60000, 3),
+        ("Field Organizer", 48000, 4),
+        ("Finance Director", 72000, 5),
+        ("Deputy Finance Director", 60000, 6),
+        ("Communications Director", 72000, 7),
+        ("Press Secretary", 60000, 8);
+ `;
+
+ db.query(createRoles, (err) => {
+  if (err) {
+    console.error("Error creating roles table:", err);
+    return;
+  }
+  console.log("Roles table created");
+ })
+
+ const createEmployees = `
+ CREATE TABLE employees (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  first_name VARCHAR(30),
+  last_name VARCHAR(30),
+  role_id INT NOT NULL,
+  manager_id INT,
+  FOREIGN KEY (role_id)
+  REFERENCES roles(id),
+  FOREIGN KEY (manager_id)
+  REFERENCES employees(id)
+)
+
+INSERT INTO employees (first_name, last_name, role_id, manager_id)
+VALUES  (Dave, Miranda, 1),
+        (Jorge, Contreras, 2, 1),
+        (Michael, Mahon, 3, 2),
+        (Lauren, Wilson, 3, 2),
+        (Heather, Meyer, 4, 3),
+        (Dan, Osman, 4, 3),
+        (Cole, Robinson, 4, 3),
+        (Linda, Featherston, 4, 3),
+        (Jessie, White, 4, 4),
+        (Rebecca, Hollister, 4, 4),
+        (Nikki, Richardson, 4, 4),
+        (Andrew, Davis, 4, 4),
+        (Ben, Meers, 5, 1),
+        (David, Stabler, 6, 13),
+        (Monica, Heth, 6, 13),
+        (Nazy, Hosseini, 6, 13),
+        (Ashley, All, 7, 1),
+        (Joe, Rogan, 8, 17),
+        (Karina, Barrett, 8, 17),
+ `;
+
+ db.query(createEmployees, (err) => {
+  if (err) {
+    console.error("Error creating employees table:", err);
+    return;
+  }
+  console.log("Employees table created");
+ })
+
+ 
+
+
+});
+
+
 inquirer
   .prompt([
     {
@@ -103,8 +223,76 @@ inquirer
 
   ])
   .then((answers) => {
-    // INSERT WHAT HAPPENS TO THE ANSWERS HERE
+    switch (answers.task) {
+      case "View all departments":
+        showDepartments();
+        break;
+      case "View all roles":
+        showRoles();
+        break;
+      case "View all employees":
+        showEmployees();
+        break;
+      case "Add a department":
+        addDepartment();
+        break;
+      case "Add a role":
+        addRole();
+      case "Add an employee":
+        addEmployee();
+      case "Update an employee role":
+        updateRole();
+      default:
+          console.log("Invalid action");
+    }
   });
+
+function showDepartments () {
+
+  console.log ("Departments shown");
+  }
+
+  function showRoles () {
+
+    console.log ("Roles shown");
+
+  }
+
+
+  function showEmployees () {
+
+    console.log ("Employees shown");
+
+  }
+
+
+
+  function addDepartment () {
+
+    console.log ("Department added");
+
+  }
+
+
+
+  function addRole () {
+
+    console.log ("Role added");
+
+  }
+
+
+  function addEmployee () {
+
+    console.log ("Employee added");
+
+  }
+
+  function updateRole () {
+
+    console.log ("Role updated");
+
+  }
 
 
 
