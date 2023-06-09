@@ -8,9 +8,27 @@ let new_department_name;
 let role_name;
 let salary;
 let department_id;
+let first_name;
+let last_name;
+let title;
+let manager_id;
 
 // Connect to database
+
+/*
+// MYSQL2/PROMISE CONNECTION
+async function example1 () {
+  const mysql = require('mysql2/promise');
+  const conn = await mysql.createConnection({ database: test });
+  const [rows, fields] = await conn.execute('select ?+? as sum', [2, 2]);
+  await conn.end();
+}
+*/
+
+// REPLACE THE BELOW WITH THE CONNECTION ABOVE
 const db = mysql.createConnection(
+ 
+ 
   {
     host: 'localhost',
     // MySQL username,
@@ -28,8 +46,9 @@ db.connect((err) => {
   console.error("Error connecting to MySQL:", err);
   return;
  }
- console.log('COnnected to MySQL server');
+ console.log('Connected to MySQL server');
 
+ /*
 const createEmployeesDB = `
 DROP DATABASE IF EXISTS employees_db;
 CREATE DATABASE employees_db;
@@ -54,7 +73,7 @@ INSERT INTO departments (new_department_name)
 VALUES  ("Management"),
         ("Field"),
         ("Finance"),
-        ("Communications");
+        ("Communications")
  `;
 
  db.query(createDepartments, (err) => {
@@ -68,14 +87,14 @@ VALUES  ("Management"),
  const createRoles = `
  CREATE TABLE roles (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  title VARCHAR(30) NOT NULL,
+  new_title VARCHAR(30) NOT NULL,
   salary DECIMAL[(7 [,0])] NOT NULL,
   department_id INT NOT NULL,
   FOREIGN KEY (department_id)
   REFERENCES departments(id)
 )
 
-INSERT INTO roles (title, salary, department_id)
+INSERT INTO roles (new_title, salary, department_id)
 VALUES  ("Campaign Manager", 120000, 1),
         ("Field Director", 72000, 2),
         ("Deputy Field Director", 60000, 3),
@@ -83,7 +102,7 @@ VALUES  ("Campaign Manager", 120000, 1),
         ("Finance Director", 72000, 5),
         ("Deputy Finance Director", 60000, 6),
         ("Communications Director", 72000, 7),
-        ("Press Secretary", 60000, 8);
+        ("Press Secretary", 60000, 8)
  `;
 
  db.query(createRoles, (err) => {
@@ -108,25 +127,25 @@ VALUES  ("Campaign Manager", 120000, 1),
 )
 
 INSERT INTO employees (first_name, last_name, role_id, manager_id)
-VALUES  (Dave, Miranda, 1),
-        (Jorge, Contreras, 2, 1),
-        (Michael, Mahon, 3, 2),
-        (Lauren, Wilson, 3, 2),
-        (Heather, Meyer, 4, 3),
-        (Dan, Osman, 4, 3),
-        (Cole, Robinson, 4, 3),
-        (Linda, Featherston, 4, 3),
-        (Jessie, White, 4, 4),
-        (Rebecca, Hollister, 4, 4),
-        (Nikki, Richardson, 4, 4),
-        (Andrew, Davis, 4, 4),
-        (Ben, Meers, 5, 1),
-        (David, Stabler, 6, 13),
-        (Monica, Heth, 6, 13),
-        (Nazy, Hosseini, 6, 13),
-        (Ashley, All, 7, 1),
-        (Joe, Rogan, 8, 17),
-        (Karina, Barrett, 8, 17),
+VALUES  ("Dave", "Miranda", 1),
+        ("Jorge", "Contreras", 2, 1),
+        ("Michael", "Mahon", 3, 2),
+        ("Lauren", "Wilson", 3, 2),
+        ("Heather", "Meyer", 4, 3),
+        ("Dan", "Osman", 4, 3),
+        ("Cole", "Robinson", 4, 3),
+        ("Linda", "Featherston", 4, 3),
+        ("Jessie", "White", 4, 4),
+        ("Rebecca", "Hollister", 4, 4),
+        ("Nikki", "Richardson", 4, 4),
+        ("Andrew", "Davis", 4, 4),
+        ("Ben", "Meers", 5, 1),
+        ("David", "Stabler", 6, 13),
+        ("Monica", "Heth", 6, 13),
+        ("Nazy", "Hosseini", 6, 13),
+        ("Ashley", "All", 7, 1),
+        ("Joe", "Rogan", 8, 17),
+        ("Karina", "Barrett", 8, 17)
  `;
 
  db.query(createEmployees, (err) => {
@@ -141,10 +160,22 @@ VALUES  (Dave, Miranda, 1),
 
 
 });
+*/
+/*
+// make it await/async
+async function getDepartments () {
+  const [departments] = await db.query(`SELECT id, new_department_name FROM departments;`);
+  console.table(departments);
+  };
 
+  getDepartments();
+*/
 
 inquirer
   .prompt([
+ 
+
+
     {
       type: "list",
       message: "What would you like to do?",
@@ -160,7 +191,7 @@ inquirer
     {
       type: "input",
       message: "What is name of the role?",
-      name: "title",
+      name: "new_title",
       when: (answers) => answers.task === 'Add a role',
 
     },
@@ -174,9 +205,24 @@ inquirer
     },
 
     {
-      type: "input",
+      type: "list",
       message: "Which department does the role belong to?",
       name: "department",
+      choices: () => {
+        return new Promise((resolve, reject) => {
+          db.query('SELECT id, new_department_name FROM departments', (err, rows) => {
+            if (err) {
+              reject(err);
+            } else {
+              const departments = rows.map(row => ({
+                name: row.new_department_name,
+                value: row.id
+              }));
+              resolve(departments);
+            }
+          });
+        });
+      },
       when: (answers) => answers.task === 'Add a role',
     },
 // HOW CAN I DISPLAY A LIST OF DEPARTMENTS HERE? SHOULD name be department_name or department_id?
@@ -223,7 +269,7 @@ inquirer
 {
   type: "input",
   message: "What is this employee's new role?",
-  name: "title",
+  name: "updated_title",
   when: (answers) => answers.task === 'Update an employee role',
 },
 // LIST OF TITLES
@@ -231,9 +277,14 @@ inquirer
   ])
   .then((answers) => {
     new_department_name = answers.new_department_name;
-    role_name = answers.title;
+    role_name = answers.new_title;
     salary = answers.salary;
     department_id = answers.department;
+    first_name = answers.first_name;
+    last_name = answers.last_name;
+    title = answers.title;
+    manager_id = answers.manager_id;
+
     // ADD VARIABLES AND PASS PARAMETERS FOR addEmployee and updateRole
     
     switch (answers.task) {
@@ -252,7 +303,7 @@ inquirer
       case "Add a role":
         addRole(role_name, salary, department_id);
       case "Add an employee":
-        addEmployee();
+        addEmployee(first_name, last_name, title, manager_id);
       case "Update an employee role":
         updateRole();
       default:
@@ -300,7 +351,7 @@ function showDepartments () {
 
 
   function addDepartment (new_department_name) {
-    db.query(`INSERT INTO departments (department_name) VALUES ('${new_department_name}')`, (err, result) => {
+    db.query(`INSERT INTO departments (new_department_name) VALUES ('${new_department_name}')`, (err, result) => {
       if (err) {
         console.log(err);
       };
@@ -313,7 +364,7 @@ function showDepartments () {
 
 
   function addRole (role_name, salary, department_id) {
-    db.query(`INSERT INTO roles (title, salary, department_id) VALUES ("${role_name}", "${salary}", "${department_id}")`, (err, result) => {
+    db.query(`INSERT INTO roles (new_title, salary, department_id) VALUES ("${role_name}", "${salary}", "${department_id}")`, (err, result) => {
       if (err) {
         console.log(err);
       };
@@ -324,21 +375,28 @@ function showDepartments () {
   };
 
 
-  function addEmployee () {
-
+  function addEmployee (first_name, last_name, title, manager_id) {
+    db.query(`INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES ("${first_name}", "${last_name}", "${title}", "${manager_id})"`, (err, result) => {
+      if (err) {
+        console.log(err);
+      };
+      console.log(result);
+    });
     console.log ("Employee added");
 
   };
 
   function updateRole () {
-
+    // find the employee ID, return the associated role_id
+    // update the role ID
+// UPDATE FUNCTION HERE that selects previous info and overwrites it with new role
     console.log ("Role updated");
 
   };
 
 
 
-
+/*
 // UPDATE THIS TO CREATE AN EMPLOYEE
 app.post('/api/new-movie', ({ body }, res) => {
   const sql = `INSERT INTO movies (movie_name)
@@ -356,7 +414,7 @@ app.post('/api/new-movie', ({ body }, res) => {
     });
   });
 });
-
+*/
 /* NOTES ON DELETING, QUERYING, WHAT TO PUT AT THE END IF YOUR REQUEST IS INVALID
 db.query(`DELETE FROM course_names WHERE id = ?`, 3, (err, result) => {
   if (err) {

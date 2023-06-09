@@ -19,10 +19,10 @@ SELECT * FROM employees;
 -- ALSO NEED TO MAKE IT SHOW DEPT AND SALARY -- 
 
 -- Add department --
-INSERT INTO departments (new_department_name) VALUES ("Scheduling");
+INSERT INTO departments (department_name) VALUES ("Scheduling");
 
 -- Add role --
-INSERT INTO roles (title, salary, department_id) VALUES ("Canvasser", 36000, 2);
+INSERT INTO roles (new_title, salary, department_id) VALUES ("Canvasser", 36000, 2);
 
 -- AND EMPLOYEE --
 INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (Jen, Psaki, 8, 17);
