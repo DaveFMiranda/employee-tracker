@@ -140,11 +140,13 @@ function addDepartment() {
         }
       );
     });
-};
+}
 
 function addRole() {
   db.query(`SELECT * FROM departments;`, (err, res) => {
-    if (err) throw err;
+    if (err) {
+      console.log(err);
+    }
     let department = res.map((dept) => ({
       name: dept.department_name,
       value: dept.id,
@@ -153,9 +155,19 @@ function addRole() {
     inquirer
       .prompt([
         {
+          type: "input",
+          name: "title",
+          message: "What is the name of the new role?",
+        },
+        {
+          type: "number",
+          name: "salary",
+          message: "What is the salary of the new role?",
+        },
+        {
           type: "list",
           name: "dept",
-          message: "which department does the role belong to?",
+          message: "Which department does the new role belong to?",
           choices: department,
         },
       ])
@@ -163,16 +175,82 @@ function addRole() {
         db.query(
           `INSERT INTO roles SET ?`,
           {
-            title: answers.role,
+            title: answers.title,
             salary: answers.salary,
             department_id: answers.dept,
           },
           (err, res) => {
             if (err) throw err;
-            console.log("Role added to Roles table");
+            console.log(res);
+            console.log("Role added");
+            init();
           }
         );
       });
+  });
+}
+
+function addEmployee() {
+  db.query(`SELECT * FROM roles;`, (err, res) => {
+    if (err) {
+      console.log(err);
+    }
+    let role = res.map((role) => ({
+      name: role.title,
+      value: role.id,
+    }));
+
+    db.query(`SELECT * FROM employees`, (err, res) => {
+      if (err) {
+        console.log(err);
+      }
+      managers = res.map((manager) => ({
+        name: manager.first_name,
+        value: manager.manager_id,
+      }));
+      inquirer
+        .prompt([
+          {
+            type: "input",
+            name: "first_name",
+            message: "What is the new employee's first name?",
+          },
+          {
+            type: "input",
+            name: "last_name",
+            message: "What is the new employee's last name?",
+          },
+          {
+            type: "list",
+            name: "role_id",
+            message: "What is the new employee's role?",
+            choices: role,
+          },
+          {
+            type: "list",
+            name: "manager_id",
+            message: "Who is the new employee's manager?",
+            choices: managers,
+          },
+        ])
+        .then((answers) => {
+          db.query(
+            `INSERT INTO employees SET ?`,
+            {
+              first_name: answers.first_name,
+              last_name: answers.last_name,
+              role_id: answers.role_id,
+              manager_id: answers.manager_id,
+            },
+            (err, res) => {
+              if (err) throw err;
+              console.log(res);
+              console.log("Employee added");
+              init();
+            }
+          );
+        });
+    });
   });
 }
 
