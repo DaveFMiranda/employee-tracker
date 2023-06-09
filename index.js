@@ -81,7 +81,6 @@ function showDepartments() {
     init();
   });
   console.log("Departments shown");
-  // console.table instead
 }
 
 function showRoles() {
@@ -205,8 +204,8 @@ function addEmployee() {
         console.log(err);
       }
       managers = res.map((manager) => ({
-        name: manager.first_name,
-        value: manager.manager_id,
+        name: manager.first_name + " " + manager.last_name,
+        value: manager.id,
       }));
       inquirer
         .prompt([
@@ -230,21 +229,22 @@ function addEmployee() {
             type: "list",
             name: "manager_id",
             message: "Who is the new employee's manager?",
-            choices: managers,
+            choices: [...managers, "An employee has no manager"],
           },
         ])
         .then((answers) => {
-          db.query(
+            const managerId = answers.manager_id === "An employee has no manager" ? null : answers.manager_id;
+
+            db.query(
             `INSERT INTO employees SET ?`,
             {
               first_name: answers.first_name,
               last_name: answers.last_name,
               role_id: answers.role_id,
-              manager_id: answers.manager_id,
+              manager_id: managerId,
             },
             (err, res) => {
               if (err) throw err;
-              console.log(res);
               console.log("Employee added");
               init();
             }
