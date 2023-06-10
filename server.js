@@ -1,6 +1,7 @@
 const inquirer = require("inquirer");
 const mysql = require("mysql2");
 
+// Creates and establishes connection to employees database.
 const db = mysql.createConnection(
   {
     host: "localhost",
@@ -19,6 +20,7 @@ db.connect((err) => {
   console.log("Connected to MySQL server");
 });
 
+// Declares the function that starts the program, asks the first question, and runs any subsequent functions.
 function init() {
   inquirer
     .prompt([
@@ -67,11 +69,13 @@ function init() {
     });
 }
 
+// An additional option to quit out of the program.
 function quit() {
   console.log("Exiting the employee tracker...");
   process.exit(0);
 }
 
+// Displays departments database.
 function showDepartments() {
   db.query(`SELECT * FROM departments;`, (err, result) => {
     if (err) {
@@ -83,10 +87,10 @@ function showDepartments() {
   console.log("Departments shown");
 }
 
+// Displays roles database.
 function showRoles() {
   db.query(
-    `SELECT roles.id, roles.title, roles.salary, departments.department_name 
-    FROM roles 
+    `SELECT roles.id, roles.title, roles.salary, departments.department_name FROM roles 
     INNER JOIN departments ON roles.department_id = departments.id;`,
     (err, result) => {
       if (err) {
@@ -99,13 +103,13 @@ function showRoles() {
   console.log("Roles shown");
 }
 
+// Displays employees database.
 function showEmployees() {
   db.query(
     `SELECT employees.id, employees.first_name, employees.last_name, roles.title, departments.department_name, roles.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employees 
     INNER JOIN roles ON employees.role_id = roles.id
     INNER JOIN departments ON roles.department_id = departments.id 
-    LEFT JOIN employees AS manager ON employees.manager_id = manager.id
-    ;`,
+    LEFT JOIN employees AS manager ON employees.manager_id = manager.id;`,
     (err, result) => {
       if (err) {
         console.log(err);
@@ -117,6 +121,7 @@ function showEmployees() {
   console.log("Employees shown");
 }
 
+// Asks for a name for a new department and then adds that new department to the departments database.
 function addDepartment() {
   inquirer
     .prompt([
@@ -133,7 +138,6 @@ function addDepartment() {
           if (err) {
             console.log(err);
           }
-          console.log(result);
           console.log("Department added");
           init();
         }
@@ -141,6 +145,7 @@ function addDepartment() {
     });
 }
 
+// Asks for a name, salary, and department for a new role and then adds that new role to the roles database.
 function addRole() {
   db.query(`SELECT * FROM departments;`, (err, res) => {
     if (err) {
@@ -180,7 +185,6 @@ function addRole() {
           },
           (err, res) => {
             if (err) throw err;
-            console.log(res);
             console.log("Role added");
             init();
           }
@@ -189,6 +193,7 @@ function addRole() {
   });
 }
 
+// Asks for a name, role, and manager for a new employee and then adds that new employee to the employees database.
 function addEmployee() {
   db.query(`SELECT * FROM roles;`, (err, res) => {
     if (err) {
@@ -259,6 +264,7 @@ function addEmployee() {
   });
 }
 
+// Asks the user for an employee to update and a new role to assign and then replaces that employee's old role with the new.
 function updateRole() {
   db.query(`SELECT * FROM roles;`, (err, res) => {
     if (err) {
@@ -307,4 +313,5 @@ function updateRole() {
   });
 }
 
+// Calls the function that starts the program.
 init();
